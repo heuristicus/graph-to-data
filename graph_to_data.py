@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import sys
+import argparse
 
 WHITE_PIXEL = np.array([1, 1, 1])
 BLACK_PIXEL = np.array([0, 0, 0])
@@ -43,22 +44,22 @@ if __name__ == '__main__':
     # image, not the values for the original image.
     for y, row in enumerate(img):
         # Keep track of the transitions between white and black pixels. We 
-        previous_col = "empty"
+        previous_col = 'empty'
         first_black = 0 # first column in which we saw a black
         last_black = 0 # last column in which we saw a black pixel
         for x, col in enumerate(row):
             if (col == WHITE_PIXEL).all(): # This is a white pixel
-                if previous_col == "black": # white pixel after black
+                if previous_col == 'black': # white pixel after black
                     # img[y][x - 1] = np.array([1,0,0]) # colour the last one red
                     last_black = x - 1
                     # break here so we don't look further than needed
                     break
-                previous_col = "white"
+                previous_col = 'white'
             elif (col == BLACK_PIXEL).all():
-                if previous_col == "white" or previous_col == "empty": # black pixel after white
+                if previous_col == 'white' or previous_col == 'empty': # black pixel after white
                     # img[y][x] = np.array([0,1,0]) # colour the first one green
                     first_black = x
-                previous_col = "black"
+                previous_col = 'black'
             else:
                 # shouldn't get here, because the image should be binary
                 print("The image should be binary, but the pixel at ({0}, {1}) was {2}".format(y, x, col))
@@ -86,20 +87,22 @@ if __name__ == '__main__':
     # plt.show()
     
     graph_values = []
+    x_values = np.arange(xminmax[0], xminmax[1], (xminmax[1]-xminmax[0])/len(stripped_line))
     # Output the approximated data, computed by using the input values for the
     # axis limits.
-    with open("testout.txt", "w") as f:
+    with open('testout.txt', 'w') as f:
         # Get the scale between the pixel values (0 to max y) and the values in the graph (min y to max y)
         y_range = yminmax[1] - yminmax[0]
         pixel_to_graph_scale = y_range/imsize[0]
         # transform the each y-coordinate into the graph scale using the scale
         # factor, then add the min y value of the axis in the graph to get it
         # into the correct range.
-        for ycoord in stripped_line:
+        f.write("x y\n")
+        for ind, ycoord in enumerate(stripped_line):
             yvalue = ycoord * pixel_to_graph_scale + yminmax[0]
             graph_values.append(yvalue)
+            f.write("{0} {1}\n".format(x_values[ind], yvalue))
 
-    x_values = np.arange(xminmax[0], xminmax[1], (xminmax[1]-xminmax[0])/len(graph_values))
     plt.plot(x_values, graph_values)
     plt.ylim(yminmax[0], yminmax[1])
     plt.show()
